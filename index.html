@@ -1,0 +1,643 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hospital Management System</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f3f7fb;
+    color: #263548;
+}
+
+header {
+    background: #087f8c;
+    color: white;
+    padding: 22px 30px;
+}
+
+header h1 {
+    font-size: 26px;
+}
+
+header p {
+    margin-top: 6px;
+    color: #e1f5f7;
+}
+
+.container {
+    display: flex;
+    min-height: calc(100vh - 90px);
+}
+
+.sidebar {
+    width: 220px;
+    background: #ffffff;
+    padding: 20px 12px;
+    box-shadow: 2px 0 8px #dce5ed;
+}
+
+.sidebar button {
+    width: 100%;
+    padding: 13px;
+    margin-bottom: 8px;
+    border: none;
+    background: white;
+    text-align: left;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #263548;
+}
+
+.sidebar button:hover,
+.sidebar button.active {
+    background: #dff5f5;
+    color: #087f8c;
+}
+
+main {
+    flex: 1;
+    padding: 28px;
+    min-width: 0;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #087f8c;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px #e1e8ef;
+}
+
+.card p {
+    color: #66788a;
+    margin-bottom: 12px;
+}
+
+.card h3 {
+    font-size: 29px;
+    color: #087f8c;
+}
+
+.panel {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px #e1e8ef;
+    margin-bottom: 22px;
+}
+
+form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #ccd6df;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.field textarea {
+    resize: vertical;
+}
+
+.full {
+    grid-column: 1 / -1;
+}
+
+.primary {
+    background: #087f8c;
+    color: white;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.primary:hover {
+    background: #066671;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+th, td {
+    padding: 13px 10px;
+    border-bottom: 1px solid #e3eaf0;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #e5f5f6;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.notice {
+    margin-top: 15px;
+    color: #087f8c;
+}
+
+@media (max-width: 750px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px;
+    }
+
+    main {
+        padding: 16px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    form {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>✚ MediCare Hospital</h1>
+    <p>Hospital Management System</p>
+</header>
+
+<div class="container">
+
+    <aside class="sidebar">
+        <button class="active" onclick="showPage('dashboard', this)">
+            🏠 Dashboard
+        </button>
+        <button onclick="showPage('patients', this)">
+            👤 Register Patient
+        </button>
+        <button onclick="showPage('doctors', this)">
+            🩺 Doctors
+        </button>
+        <button onclick="showPage('appointments', this)">
+            📅 Appointments
+        </button>
+        <button onclick="showPage('admissions', this)">
+            🏥 Admissions
+        </button>
+        <button onclick="showPage('records', this)">
+            📋 Patient Records
+        </button>
+    </aside>
+
+    <main>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page active">
+            <h2>Dashboard</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <p>Total Patients</p>
+                    <h3 id="patientCount">0</h3>
+                </div>
+
+                <div class="card">
+                    <p>Appointments</p>
+                    <h3 id="appointmentCount">0</h3>
+                </div>
+
+                <div class="card">
+                    <p>Admissions</p>
+                    <h3 id="admissionCount">0</h3>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Welcome to MediCare Hospital</h3>
+                <p style="margin-top:12px; line-height:1.8">
+                    Manage patient registration, doctor details,
+                    appointments and hospital admissions from one place.
+                </p>
+            </div>
+
+            <div class="panel">
+                <h3>Hospital Services</h3>
+                <p style="margin-top:12px; line-height:2">
+                    ✔ Patient Care<br>
+                    ✔ Doctor Consultation<br>
+                    ✔ Appointment Scheduling<br>
+                    ✔ Admission Management
+                </p>
+            </div>
+        </section>
+
+        <!-- PATIENT REGISTRATION -->
+        <section id="patients" class="page">
+            <h2>Patient Registration</h2>
+
+            <div class="panel">
+                <form id="patientForm">
+                    <div class="field">
+                        <label>Patient Name</label>
+                        <input name="name" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Age</label>
+                        <input name="age" type="number"
+                               min="0" max="120" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Gender</label>
+                        <select name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Phone Number</label>
+                        <input name="phone" type="tel"
+                               pattern="[0-9]{10}"
+                               maxlength="10"
+                               placeholder="10 digit number" required>
+                    </div>
+
+                    <div class="field full">
+                        <label>Address</label>
+                        <textarea name="address" rows="2"
+                                  required></textarea>
+                    </div>
+
+                    <div class="field full">
+                        <button class="primary" type="submit">
+                            Register Patient
+                        </button>
+                    </div>
+                </form>
+
+                <p id="patientMessage" class="notice"></p>
+            </div>
+        </section>
+
+        <!-- DOCTORS -->
+        <section id="doctors" class="page">
+            <h2>Doctors</h2>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Doctor ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>D101</td>
+                                <td>Dr. Ravi Kumar</td>
+                                <td>Cardiology</td>
+                                <td>Available</td>
+                            </tr>
+                            <tr>
+                                <td>D102</td>
+                                <td>Dr. Priya Sharma</td>
+                                <td>General Medicine</td>
+                                <td>Available</td>
+                            </tr>
+                            <tr>
+                                <td>D103</td>
+                                <td>Dr. Arjun Rao</td>
+                                <td>Orthopedics</td>
+                                <td>Available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- APPOINTMENTS -->
+        <section id="appointments" class="page">
+            <h2>Book Appointment</h2>
+
+            <div class="panel">
+                <form id="appointmentForm">
+                    <div class="field">
+                        <label>Patient Name</label>
+                        <input name="patient" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Doctor</label>
+                        <select name="doctor" required>
+                            <option value="">Select Doctor</option>
+                            <option>Dr. Ravi Kumar</option>
+                            <option>Dr. Priya Sharma</option>
+                            <option>Dr. Arjun Rao</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Appointment Date</label>
+                        <input name="date" type="date"
+                               min="2026-10-12" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Appointment Time</label>
+                        <input name="time" type="time" required>
+                    </div>
+
+                    <div class="field full">
+                        <button class="primary" type="submit">
+                            Book Appointment
+                        </button>
+                    </div>
+                </form>
+
+                <p id="appointmentMessage" class="notice"></p>
+            </div>
+        </section>
+
+        <!-- ADMISSIONS -->
+        <section id="admissions" class="page">
+            <h2>Patient Admissions</h2>
+
+            <div class="panel">
+                <form id="admissionForm">
+                    <div class="field">
+                        <label>Patient ID</label>
+                        <input name="patientId" type="number"
+                               min="1" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Ward Number</label>
+                        <input name="ward" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Admission Date</label>
+                        <input name="admissionDate" type="date"
+                               required>
+                    </div>
+
+                    <div class="field">
+                        <label>Discharge Date (optional)</label>
+                        <input name="dischargeDate" type="date">
+                    </div>
+
+                    <div class="field full">
+                        <label>Reason for Admission</label>
+                        <textarea name="reason" rows="3"
+                                  required></textarea>
+                    </div>
+
+                    <div class="field full">
+                        <button class="primary" type="submit">
+                            Save Admission
+                        </button>
+                    </div>
+                </form>
+
+                <p id="admissionMessage" class="notice"></p>
+            </div>
+        </section>
+
+        <!-- PATIENT RECORDS -->
+        <section id="records" class="page">
+            <h2>Patient Records</h2>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientTable">
+                            <tr>
+                                <td colspan="5">
+                                    No patients registered yet.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+let patients = [];
+let appointments = [];
+let admissions = [];
+
+function showPage(pageId, button) {
+    document.querySelectorAll(".page").forEach(function(page) {
+        page.classList.remove("active");
+    });
+
+    document.getElementById(pageId).classList.add("active");
+
+    document.querySelectorAll(".sidebar button").forEach(function(btn) {
+        btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+}
+
+function updateDashboard() {
+    document.getElementById("patientCount").textContent =
+        patients.length;
+
+    document.getElementById("appointmentCount").textContent =
+        appointments.length;
+
+    document.getElementById("admissionCount").textContent =
+        admissions.length;
+}
+
+document.getElementById("patientForm").addEventListener(
+    "submit", function(event) {
+        event.preventDefault();
+
+        let form = event.target;
+
+        let patient = {
+            id: patients.length + 1,
+            name: form.elements["name"].value,
+            age: form.elements["age"].value,
+            gender: form.elements["gender"].value,
+            phone: form.elements["phone"].value,
+            address: form.elements["address"].value
+        };
+
+        patients.push(patient);
+
+        document.getElementById("patientMessage").textContent =
+            "Patient registered successfully! Patient ID: " + patient.id;
+
+        form.reset();
+        updatePatientTable();
+        updateDashboard();
+    }
+);
+
+function updatePatientTable() {
+    let table = document.getElementById("patientTable");
+    table.replaceChildren();
+
+    if (patients.length === 0) {
+        let row = table.insertRow();
+        let cell = row.insertCell();
+        cell.colSpan = 5;
+        cell.textContent = "No patients registered yet.";
+        return;
+    }
+
+    patients.forEach(function(patient) {
+        let row = table.insertRow();
+
+        [
+            patient.id,
+            patient.name,
+            patient.age,
+            patient.gender,
+            patient.phone
+        ].forEach(function(value) {
+            let cell = row.insertCell();
+            cell.textContent = value;
+        });
+    });
+}
+
+document.getElementById("appointmentForm").addEventListener(
+    "submit", function(event) {
+        event.preventDefault();
+
+        let form = event.target;
+
+        appointments.push({
+            patient: form.elements["patient"].value,
+            doctor: form.elements["doctor"].value,
+            date: form.elements["date"].value,
+            time: form.elements["time"].value
+        });
+
+        document.getElementById("appointmentMessage").textContent =
+            "Appointment booked successfully!";
+
+        form.reset();
+        updateDashboard();
+    }
+);
+
+document.getElementById("admissionForm").addEventListener(
+    "submit", function(event) {
+        event.preventDefault();
+
+        let form = event.target;
+        let discharge = form.elements["dischargeDate"].value;
+        let admissionDate = form.elements["admissionDate"].value;
+
+        if (discharge && discharge < admissionDate) {
+            document.getElementById("admissionMessage").textContent =
+                "Discharge date cannot be before admission date.";
+            return;
+        }
+
+        admissions.push({
+            patientId: form.elements["patientId"].value,
+            ward: form.elements["ward"].value,
+            admissionDate: admissionDate,
+            dischargeDate: discharge,
+            reason: form.elements["reason"].value
+        });
+
+        document.getElementById("admissionMessage").textContent =
+            "Admission details saved successfully!";
+
+        form.reset();
+        updateDashboard();
+    }
+);
+
+updateDashboard();
+</script>
+
+</body>
+</html>
